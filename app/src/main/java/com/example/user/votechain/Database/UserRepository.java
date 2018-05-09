@@ -33,6 +33,11 @@ public class UserRepository implements IUserDataSource {
     }
 
     @Override
+    public Flowable<List<User>> getUserByName(String userName) {
+        return mLocalDataSource.getUserByName(userName);
+    }
+
+    @Override
     public void insert(User... users) {
         mLocalDataSource.insert(users);
     }

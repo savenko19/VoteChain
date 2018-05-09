@@ -71,6 +71,11 @@ public class Login extends AppCompatActivity {
                     Intent intent = new Intent(Login.this, CreateNewVote.class);
                     startActivity(intent);
                 }
+
+                if (edtUserName.getText().toString().equals("user") && edtPassword.getText().toString().equals("1234")) {
+                    Intent intent = new Intent(Login.this, UserProfile.class);
+                    startActivity(intent);
+                }
             }
         });
 

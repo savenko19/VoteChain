@@ -34,6 +34,11 @@ public class UserDataSource implements IUserDataSource {
     }
 
     @Override
+    public Flowable<List<User>> getUserByName(String userName) {
+        return userDAO.getUserByName(userName);
+    }
+
+    @Override
     public void insert(User... users) {
         userDAO.insert(users);
     }

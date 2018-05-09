@@ -75,13 +75,13 @@ public class CreateNewVote extends AppCompatActivity {
         variantRepository = VariantRepository.getInstance(VariantDataSource.getInstance(database.variantDAO()));
 
         //Event
-        /*fabUserList.setOnClickListener(new View.OnClickListener() {
+        fabUserList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(CreateNewVote.this, UserList.class);
                 startActivity(intent);
             }
-        });*/
+        });
         fabAddNewVote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -215,8 +215,6 @@ public class CreateNewVote extends AppCompatActivity {
         menu.add(Menu.NONE, 1, Menu.NONE, "Удалить");
         menu.add(Menu.NONE, 2, Menu.NONE, "Добавить вариант");
         menu.add(Menu.NONE, 3, Menu.NONE, "Просмотр");
-
-
     }
 
     @Override

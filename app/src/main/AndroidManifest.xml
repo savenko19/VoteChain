@@ -23,7 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".UserList" />
-        <activity android:name=".UserProfile"></activity>
+        <activity android:name=".UserProfile" />
+        <activity android:name=".VoteVariantList"></activity>
     </application>
 
 </manifest>
