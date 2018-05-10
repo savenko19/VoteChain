@@ -24,7 +24,7 @@ public class VariantDataSource implements IVariantDataSource {
     }
 
     @Override
-    public Flowable<List<VoteVariant>> getAllByVote(int userId) {
+    public Flowable<List<VoteVariant>> getAllByVote(long userId) {
         return variantDAO.getAllByVote(userId);
     }
 
@@ -44,7 +44,8 @@ public class VariantDataSource implements IVariantDataSource {
     }
 
     @Override
-    public void deleteAllByVote(int userId) {
+    public void deleteAllByVote(long userId) {
         variantDAO.deleteAllByVote(userId);
     }
+
 }

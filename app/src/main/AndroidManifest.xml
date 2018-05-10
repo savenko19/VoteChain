@@ -24,7 +24,8 @@
         </activity>
         <activity android:name=".UserList" />
         <activity android:name=".UserProfile" />
-        <activity android:name=".VoteVariantList"></activity>
+        <activity android:name=".VoteVariantList" />
+        <activity android:name=".VoteVariantListAdmin"></activity>
     </application>
 
 </manifest>

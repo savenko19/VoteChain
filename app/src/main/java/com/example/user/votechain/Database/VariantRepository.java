@@ -23,7 +23,7 @@ public class VariantRepository implements IVariantDataSource {
     }
 
     @Override
-    public Flowable<List<VoteVariant>> getAllByVote(int userId) {
+    public Flowable<List<VoteVariant>> getAllByVote(long userId) {
         return mLocalDataSource.getAllByVote(userId);
     }
 
@@ -43,7 +43,7 @@ public class VariantRepository implements IVariantDataSource {
     }
 
     @Override
-    public void deleteAllByVote(int userId) {
+    public void deleteAllByVote(long userId) {
         mLocalDataSource.deleteAllByVote(userId);
     }
 }

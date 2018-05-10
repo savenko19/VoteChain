@@ -24,8 +24,12 @@ public class VoteVariant {
     @ColumnInfo(name = "variant_name")
     private String name;
 
+    @ColumnInfo(name = "variant_score")
+    private int variantScore;
+
+
     @ColumnInfo(name = "vote_id")
-    private int voteId;
+    private long voteId;
 
     public VoteVariant() {
     }
@@ -52,16 +56,24 @@ public class VoteVariant {
         this.name = name;
     }
 
-    public int getVoteId() {
+    public long getVoteId() {
         return voteId;
     }
 
-    public void setVoteId(int voteId) {
+    public void setVoteId(long voteId) {
         this.voteId = voteId;
+    }
+
+    public int getVariantScore() {
+        return variantScore;
+    }
+
+    public void setVariantScore(int variantScore) {
+        this.variantScore = variantScore;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder(name).toString();
+        return new StringBuilder(name).append(variantScore).toString();
     }
 }

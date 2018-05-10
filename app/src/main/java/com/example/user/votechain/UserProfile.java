@@ -51,12 +51,7 @@ public class UserProfile extends AppCompatActivity {
         adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, voteList);
         registerForContextMenu(listVotesUser);
         listVotesUser.setAdapter(adapter);
-
         loadData();
-
-        for (Vote vote: voteList){
-
-        }
     }
 
     private void loadData() {
@@ -89,7 +84,7 @@ public class UserProfile extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         menu.setHeaderTitle("Выберете действие:");
 
-        menu.add(Menu.NONE, 0, Menu.NONE, "Проголосовать");
+        menu.add(Menu.NONE, 0, Menu.NONE, "Участвовать");
     }
 
     @Override
@@ -100,6 +95,10 @@ public class UserProfile extends AppCompatActivity {
         switch (item.getItemId()) {
             case 0: {
                 Intent intent = new Intent(UserProfile.this, VoteVariantList.class);
+                String voteName = vote.getName();
+                long voteId = vote.getId();
+                intent.putExtra("voteName", voteName);
+                intent.putExtra("voteId", voteId);
                 startActivity(intent);
                 break;
             }

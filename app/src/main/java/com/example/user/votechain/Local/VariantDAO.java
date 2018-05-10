@@ -15,7 +15,7 @@ import io.reactivex.Flowable;
 @Dao
 public interface VariantDAO {
     @Query("SELECT * FROM variants WHERE vote_id = :userId")
-    Flowable<List<VoteVariant>> getAllByVote(int userId);
+    Flowable<List<VoteVariant>> getAllByVote(long userId);
 
     @Insert
     void insert(VoteVariant... variants);
@@ -27,7 +27,7 @@ public interface VariantDAO {
     void  delete(VoteVariant variant);
 
     @Query("DELETE FROM variants WHERE vote_id = :userId")
-    void deleteAllByVote(int userId);
+    void deleteAllByVote(long userId);
 
 
 }

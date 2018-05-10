@@ -266,7 +266,10 @@ public class CreateNewVote extends AppCompatActivity {
             }
             break;
             case 2: {
-                final EditText edtVariantName = new EditText(CreateNewVote.this);
+                Intent intent = new Intent(CreateNewVote.this, VoteVariantListAdmin.class);
+                intent.putExtra("voteId", vote.getId());
+                startActivity(intent);
+                /*final EditText edtVariantName = new EditText(CreateNewVote.this);
                 edtVariantName.setHint("Введите название");
                 new AlertDialog.Builder(CreateNewVote.this)
                         .setTitle("Новый вариант")
@@ -278,7 +281,7 @@ public class CreateNewVote extends AppCompatActivity {
                                     @Override
                                     public void subscribe(ObservableEmitter<Object> e) throws Exception {
                                         VoteVariant variant = new VoteVariant(edtVariantName.getText().toString());
-                                        variant.setVoteId((int) vote.getId());
+                                        variant.setVoteId(vote.getId());
                                         variantRepository.insert(variant);
                                         e.onComplete();
                                     }
@@ -309,11 +312,11 @@ public class CreateNewVote extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
-                }).create().show();
+                }).create().show();*/
             }
             break;
             case 3: {
-               /* final TextView txvVoteName = new TextView(CreateNewVote.this);
+                /*final TextView txvVoteName = new TextView(CreateNewVote.this);
                 txvVoteName.setText(vote.getName());
                 List<VoteVariant> variants = (List<VoteVariant>) variantRepository.getAllByVote((int) vote.getId());
                 ListView listView = new ListView(CreateNewVote.this);

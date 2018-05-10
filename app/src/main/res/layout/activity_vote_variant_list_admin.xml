@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".VoteVariantList">
+
+    <TextView
+        android:id="@+id/test"
+        android:textSize="20dp"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabAddNewVariant"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:clickable="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add_black_24dp"
+        android:layout_margin="16dp" />
+
+    <ListView
+        android:id="@+id/variantList"
+        android:layout_width="match_parent"
+        android:layout_height="484dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="27dp"
+        android:layout_alignParentLeft="true"></ListView>
+
+</RelativeLayout>
