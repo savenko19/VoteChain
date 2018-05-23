@@ -8,8 +8,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,20 +17,18 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.user.votechain.Blockchain.Wallet;
 import com.example.user.votechain.Database.AppDatabase;
 import com.example.user.votechain.Database.VariantRepository;
 import com.example.user.votechain.Database.VoteRepository;
 import com.example.user.votechain.Local.VariantDataSource;
 import com.example.user.votechain.Local.VoteDataSource;
 import com.example.user.votechain.Model.Vote;
-import com.example.user.votechain.Model.VoteVariant;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -98,6 +96,8 @@ public class CreateNewVote extends AppCompatActivity {
                                     public void subscribe(ObservableEmitter<Object> e) throws Exception {
                                         Vote vote = new Vote(newVote.getText().toString(), "Активно");
                                         voteRepository.insert(vote);
+                                        Wallet voteWallet = new Wallet(vote.getId());
+                                        Log.d(LOG_TAG, "Vote wallet created");
                                         e.onComplete();
                                     }
                                 })
@@ -214,7 +214,7 @@ public class CreateNewVote extends AppCompatActivity {
         menu.add(Menu.NONE, 0, Menu.NONE, "Изменить");
         menu.add(Menu.NONE, 1, Menu.NONE, "Удалить");
         menu.add(Menu.NONE, 2, Menu.NONE, "Добавить вариант");
-        menu.add(Menu.NONE, 3, Menu.NONE, "Просмотр");
+        menu.add(Menu.NONE, 3, Menu.NONE, "Деактивировать");
     }
 
     @Override
@@ -269,68 +269,36 @@ public class CreateNewVote extends AppCompatActivity {
                 Intent intent = new Intent(CreateNewVote.this, VoteVariantListAdmin.class);
                 intent.putExtra("voteId", vote.getId());
                 startActivity(intent);
-                /*final EditText edtVariantName = new EditText(CreateNewVote.this);
-                edtVariantName.setHint("Введите название");
-                new AlertDialog.Builder(CreateNewVote.this)
-                        .setTitle("Новый вариант")
-                        .setView(edtVariantName)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Disposable disposable = io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
-                                    @Override
-                                    public void subscribe(ObservableEmitter<Object> e) throws Exception {
-                                        VoteVariant variant = new VoteVariant(edtVariantName.getText().toString());
-                                        variant.setVoteId(vote.getId());
-                                        variantRepository.insert(variant);
-                                        e.onComplete();
-                                    }
-                                })
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribeOn(Schedulers.io())
-                                        .subscribe(new Consumer() {
-                                                       @Override
-                                                       public void accept(Object o) throws Exception {
-
-                                                       }
-                                                   }, new Consumer<Throwable>() {
-                                                       @Override
-                                                       public void accept(Throwable throwable) throws Exception {
-                                                           Toast.makeText(CreateNewVote.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                                       }
-                                                   },
-                                                new Action() {
-                                                    @Override
-                                                    public void run() throws Exception {
-                                                        loadData();
-                                                    }
-                                                }
-                                        );
-                            }
-                        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).create().show();*/
             }
             break;
             case 3: {
-                /*final TextView txvVoteName = new TextView(CreateNewVote.this);
-                txvVoteName.setText(vote.getName());
-                List<VoteVariant> variants = (List<VoteVariant>) variantRepository.getAllByVote((int) vote.getId());
-                ListView listView = new ListView(CreateNewVote.this);
-                ArrayAdapter arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, variants);
-                registerForContextMenu(listView);
-                listView.setAdapter(arrayAdapter);
-                new AlertDialog.Builder(CreateNewVote.this)
-                        .setView(listView)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create().show();*/
+                Disposable disposable = io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<Object> e) throws Exception {
+                        vote.setStatus("Неактивно");
+                        voteRepository.update(vote);
+                        e.onComplete();
+                    }
+                }).observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new Consumer() {
+                                       @Override
+                                       public void accept(Object o) throws Exception {
+                                           Toast.makeText(CreateNewVote.this, "Ok", Toast.LENGTH_SHORT).show();
+                                       }
+                                   }, new Consumer<Throwable>() {
+                                       @Override
+                                       public void accept(Throwable throwable) throws Exception {
+                                           Toast.makeText(CreateNewVote.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                       }
+                                   },
+                                new Action() {
+                                    @Override
+                                    public void run() throws Exception {
+                                        loadData();
+                                    }
+                                }
+                        );
             }
             break;
         }

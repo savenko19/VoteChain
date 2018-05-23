@@ -16,6 +16,9 @@ public interface VoteDAO {
     @Query("SELECT * FROM votes")
     Flowable<List<Vote>> getAll();
 
+    /*@Query("SELECT * FROM votes WHERE id =:voteId")
+    Vote getVoteById(long voteId);*/
+
     @Insert
     void insert(Vote... votes);
 

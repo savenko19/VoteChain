@@ -55,6 +55,6 @@ public class User {
 
     @Override
     public String toString() {
-        return new StringBuilder(userName).toString();
+        return new StringBuilder(userName + " id: ").append(id).toString();
     }
 }

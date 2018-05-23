@@ -4,7 +4,6 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -70,10 +69,11 @@ public class VoteVariant {
 
     public void setVariantScore(int variantScore) {
         this.variantScore = variantScore;
+
     }
 
     @Override
     public String toString() {
-        return new StringBuilder(name).append(variantScore).toString();
+        return new StringBuilder(name).append("\n").append(variantScore).toString();
     }
 }

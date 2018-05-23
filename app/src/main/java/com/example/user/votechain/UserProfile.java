@@ -15,7 +15,6 @@ import android.widget.Toast;
 import com.example.user.votechain.Database.AppDatabase;
 import com.example.user.votechain.Database.VoteRepository;
 import com.example.user.votechain.Local.VoteDataSource;
-import com.example.user.votechain.Model.User;
 import com.example.user.votechain.Model.Vote;
 
 import java.util.ArrayList;

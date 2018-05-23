@@ -8,6 +8,7 @@ import io.reactivex.Flowable;
 
 public interface IVoteDataSource {
     Flowable<List<Vote>> getAll();
+    //Vote getVoteById(long voteId);
     void insert(Vote... votes);
     void update(Vote... votes);
     void delete(Vote vote);

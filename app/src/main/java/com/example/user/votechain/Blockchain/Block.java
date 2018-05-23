@@ -1,24 +1,34 @@
 package com.example.user.votechain.Blockchain;
 
+
+
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Block {
     public String hash;
     public String preHash;
-    private String data;
-    private long timeStamp;
+    private String merkleRoot;
 
-    public Block(String date, String previousHash) {
-        this.data = date;
+    public transient ArrayList<Transaction> transactions = new ArrayList<>(); //our data will be a simple message.
+    public long timeStamp; //as number of milliseconds since 1/1/1970.
+    public int nonce;
+
+    public Block(String previousHash ) {
         this.preHash = previousHash;
         this.timeStamp = new Date().getTime();
-        this.hash = calculateHash();
+
+        this.hash = calculateHash(); //Making sure we do this after we set the other values.
     }
 
     public String calculateHash() {
-        String calculatedHash = Sha256(preHash + Long.toString(timeStamp) + data);
-        return calculatedHash;
+        String calculatedhash = StringUtil.applySha256(
+                preHash +
+                        Long.toString(timeStamp) +
+                        Integer.toString(nonce) +
+                        merkleRoot);
+        return calculatedhash;
     }
 
     public static String Sha256(String input) {

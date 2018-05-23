@@ -2,12 +2,16 @@ package com.example.user.votechain;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -137,5 +141,127 @@ public class VoteVariantListAdmin extends AppCompatActivity{
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        menu.setHeaderTitle("Выберете действие:");
+
+        menu.add(Menu.NONE, 0, Menu.NONE, "Изменить");
+        menu.add(Menu.NONE, 1, Menu.NONE, "Удалить");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        final VoteVariant variant = variantList.get(info.position);
+
+        switch (item.getItemId()) {
+            case 0: {
+                final EditText edtName = new EditText(VoteVariantListAdmin.this);
+                edtName.setText(variant.getName());
+                edtName.setHint("Редоктирование");
+                new AlertDialog.Builder(VoteVariantListAdmin.this)
+                        .setMessage("Введите название")
+                        .setView(edtName)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (TextUtils.isEmpty(edtName.getText().toString()))
+                                    return;
+                                else {
+                                    variant.setName(edtName.getText().toString());
+                                    updateVoteVariant(variant);
+                                }
+                            }
+                        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
+            }
+            break;
+            case 1: {
+                new AlertDialog.Builder(VoteVariantListAdmin.this)
+                        .setMessage("Вы хотите удалить " + variant.getName())
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteVoteVariant(variant);
+                            }
+                        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
+            }
+            break;
+        }
+        return true;
+    }
+
+    private void updateVoteVariant(final VoteVariant variant) {
+        Disposable disposable = io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
+            @Override
+            public void subscribe(ObservableEmitter<Object> e) throws Exception {
+                variantRepository.update(variant);
+                e.onComplete();
+            }
+        })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer() {
+                               @Override
+                               public void accept(Object o) throws Exception {
+
+                               }
+                           }, new Consumer<Throwable>() {
+                               @Override
+                               public void accept(Throwable throwable) throws Exception {
+                                   Toast.makeText(VoteVariantListAdmin.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                               }
+                           },
+                        new Action() {
+                            @Override
+                            public void run() throws Exception {
+                                loadData();
+                            }
+                        }
+                );
+        compositeDisposable.add(disposable);
+    }
+
+    private void deleteVoteVariant(final VoteVariant variant) {
+        Disposable disposable = io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
+            @Override
+            public void subscribe(ObservableEmitter<Object> e) throws Exception {
+                variantRepository.delete(variant);
+                e.onComplete();
+            }
+        })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer() {
+                               @Override
+                               public void accept(Object o) throws Exception {
+
+                               }
+                           }, new Consumer<Throwable>() {
+                               @Override
+                               public void accept(Throwable throwable) throws Exception {
+                                   Toast.makeText(VoteVariantListAdmin.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                               }
+                           },
+                        new Action() {
+                            @Override
+                            public void run() throws Exception {
+                                loadData();
+                            }
+                        }
+                );
+
+    }
 
 }

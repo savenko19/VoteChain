@@ -6,18 +6,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.user.votechain.Blockchain.Transaction;
+import com.example.user.votechain.Blockchain.Wallet;
 import com.example.user.votechain.Database.AppDatabase;
 import com.example.user.votechain.Database.UserRepository;
 import com.example.user.votechain.Local.UserDataSource;
 import com.example.user.votechain.Model.User;
-import com.example.user.votechain.Model.Vote;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +35,7 @@ public class Login extends AppCompatActivity {
 
     private EditText edtUserName, edtPassword;
     private TextView txvLogin;
+    private TextView loginStatus;
 
     List<User> users = new ArrayList<>();
     //ArrayAdapter adapter;
@@ -57,8 +56,7 @@ public class Login extends AppCompatActivity {
         edtPassword = findViewById(R.id.edtLoginPassword);
 
         txvLogin = findViewById(R.id.txvLogin);
-
-        //adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, users);
+        loginStatus = findViewById(R.id.loginStatus);
 
         AppDatabase database = AppDatabase.getInstance(this);
         userRepository = UserRepository.getInstance(UserDataSource.getInstance(database.userDAO()));
@@ -67,11 +65,40 @@ public class Login extends AppCompatActivity {
         txvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Disposable disposable = userRepository.getAllUsers()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new Consumer<List<User>>() {
+                            @Override
+                            public void accept(List<User> users) throws Exception {
+                                for (User user: users) {
+                                    if (user.getUserName().equals(edtUserName.getText().toString())) {
+                                        if (user.getPassword().equals(edtPassword.getText().toString())) {
+                                            Intent intent = new Intent(Login.this, UserProfile.class);
+                                            startActivity(intent);
+                                            break;
+                                        } else {
+                                            loginStatus.setText("Неверный пароль");
+                                        }
+                                    } else {
+                                        loginStatus.setText("Такого пользователя не существует");
+                                    }
+                                }
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) throws Exception {
+                                Toast.makeText(Login.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                compositeDisposable.add(disposable);
+
                 if (edtUserName.getText().toString().equals("admin") && edtPassword.getText().toString().equals("admin")) {
                     Intent intent = new Intent(Login.this, CreateNewVote.class);
                     startActivity(intent);
                 }
 
+                
                 if (edtUserName.getText().toString().equals("user") && edtPassword.getText().toString().equals("1234")) {
                     Intent intent = new Intent(Login.this, UserProfile.class);
                     startActivity(intent);
@@ -86,11 +113,14 @@ public class Login extends AppCompatActivity {
                 Disposable disposable = io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
                     @Override
                     public void subscribe(ObservableEmitter<Object> e) throws Exception {
-                        User user = new User("name", "password");
+                        User user = new User(edtUserName.getText().toString(), edtPassword.getText().toString());
                         users.add(user);
                         userRepository.insert(user);
-                        Log.d(LOG_TAG, "================================================================================");
                         e.onComplete();
+                        Wallet userWallet = new Wallet(user.getId());
+                        Wallet coinbase = new Wallet();
+                        Transaction genesisTransaction = new Transaction(coinbase.publicKey, userWallet.publicKey, 100);
+                        Log.d(LOG_TAG, "User wallet created: " + user.getUserName() + " " + genesisTransaction.value);
                     }
                 })
                         .observeOn(AndroidSchedulers.mainThread())
@@ -114,6 +144,7 @@ public class Login extends AppCompatActivity {
                                 }
                         );
             }
+
         });
 //        loadData();
     }
@@ -139,7 +170,6 @@ public class Login extends AppCompatActivity {
     private void onGetAllUserSuccess(List<User> users) {
         users.clear();
         users.addAll(users);
-       // adapter.notifyDataSetChanged();
     }
 
     @Override
