@@ -13,6 +13,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.user.votechain.Blockchain.Block;
+import com.example.user.votechain.Blockchain.Transaction;
+import com.example.user.votechain.Blockchain.VoteChain;
 import com.example.user.votechain.Database.AppDatabase;
 import com.example.user.votechain.Database.VariantRepository;
 import com.example.user.votechain.Database.VoteRepository;
@@ -102,7 +105,20 @@ public class VoteVariantList extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case 0: {
-                variant.setVariantScore(variant.getVariantScore() + 1);
+                if (VoteChain.chain.size() == 0) {
+                    Transaction transaction = new Transaction(1, variant.getId());
+                    Block genesisBlock = new Block("0");
+                    genesisBlock.AddTransaction(transaction);
+                    VoteChain.chain.add(genesisBlock);
+                    variant.setVariantScore(variant.getVariantScore() + 1);
+                } else {
+                    Transaction transaction = new Transaction(1, variant.getId());
+                    Block lastBlock = VoteChain.chain.get(VoteChain.chain.size() - 1);
+                    Block block = new Block(lastBlock.preHash);
+                    block.AddTransaction(transaction);
+                    VoteChain.chain.add(block);
+                    variant.setVariantScore(variant.getVariantScore() + 1);
+                }
                 break;
             }
         }
