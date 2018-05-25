@@ -7,7 +7,8 @@ import java.util.Date;
 public class Block {
     public String hash;
     public String preHash;
-    public ArrayList<Transaction> transactions;
+    public ArrayList<Transaction> transactions = new ArrayList<>();
+    public int proof;
     private long timeStamp;
 
     public Block(String preHash) {
@@ -49,4 +50,23 @@ public class Block {
             throw new RuntimeException(e);
         }
     }
+
+    public int CreatePoW(int lastProof, String preHash) {
+        int proof = 0;
+        while (!IsValidProof(lastProof, proof, preHash)) {
+            proof++;
+        }
+
+        return proof;
+    }
+
+    private boolean IsValidProof(int lastProof, int proof, String preHash) {
+        String result = applySha256(lastProof
+        +proof
+        +preHash);
+
+        return result.startsWith("0000");
+    }
+
+
 }

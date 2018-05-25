@@ -21,6 +21,7 @@ import com.example.user.votechain.Model.Vote;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Flowable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -67,6 +68,19 @@ public class Login extends AppCompatActivity {
         txvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                users = (List<User>) userRepository.getAllUsers();
+
+                for (User user : users) {
+                    if (edtUserName.getText().toString().equals(user.getUserName())) {
+                        if (edtPassword.getText().toString().equals(user.getPassword())) {
+                            Intent intent = new Intent(Login.this, UserProfile.class);
+                            String userName = edtUserName.getText().toString();
+                            intent.putExtra("userName", userName);
+                            startActivity(intent);
+                            break;
+                        }
+                    }
+                }
                 if (edtUserName.getText().toString().equals("admin") && edtPassword.getText().toString().equals("admin")) {
                     Intent intent = new Intent(Login.this, CreateNewVote.class);
                     startActivity(intent);
@@ -86,7 +100,7 @@ public class Login extends AppCompatActivity {
                 Disposable disposable = io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
                     @Override
                     public void subscribe(ObservableEmitter<Object> e) throws Exception {
-                        User user = new User("name", "password");
+                        User user = new User(edtUserName.getText().toString(), edtPassword.getText().toString());
                         users.add(user);
                         userRepository.insert(user);
                         Log.d(LOG_TAG, "================================================================================");

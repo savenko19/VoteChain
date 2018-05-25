@@ -74,6 +74,6 @@ public class VoteVariant {
 
     @Override
     public String toString() {
-        return new StringBuilder(name).append(variantScore).toString();
+        return new StringBuilder(name).append("\n").append(variantScore).toString();
     }
 }

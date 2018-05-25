@@ -1,9 +1,11 @@
 package com.example.user.votechain;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,16 +26,22 @@ import com.example.user.votechain.Local.VoteDataSource;
 import com.example.user.votechain.Model.Vote;
 import com.example.user.votechain.Model.VoteVariant;
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class VoteVariantList extends AppCompatActivity {
+public class VoteVariantList extends AppCompatActivity implements Serializable  {
     private ListView variantListViewUser;
 
     List<VoteVariant> variantList = new ArrayList<>();
@@ -98,27 +106,69 @@ public class VoteVariantList extends AppCompatActivity {
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+    public boolean onContextItemSelected(final MenuItem item) {
+        final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         final VoteVariant variant = variantList.get(info.position);
         final Vote vote;
 
         switch (item.getItemId()) {
             case 0: {
-                if (VoteChain.chain.size() == 0) {
-                    Transaction transaction = new Transaction(1, variant.getId());
-                    Block genesisBlock = new Block("0");
-                    genesisBlock.AddTransaction(transaction);
-                    VoteChain.chain.add(genesisBlock);
-                    variant.setVariantScore(variant.getVariantScore() + 1);
-                } else {
-                    Transaction transaction = new Transaction(1, variant.getId());
-                    Block lastBlock = VoteChain.chain.get(VoteChain.chain.size() - 1);
-                    Block block = new Block(lastBlock.preHash);
-                    block.AddTransaction(transaction);
-                    VoteChain.chain.add(block);
-                    variant.setVariantScore(variant.getVariantScore() + 1);
-                }
+
+                Disposable disposable = io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<Object> e) throws Exception {
+                        int currScore = variant.getVariantScore();
+                        if (VoteChain.chain.size() == 0) {
+                            Transaction transaction = new Transaction(1, variant.getId());
+                            Block genesisBlock = new Block("0");
+                            genesisBlock.AddTransaction(transaction);
+                            VoteChain.chain.add(genesisBlock);
+                            variant.setVariantScore(currScore + 1);
+                            try {
+                                FileOutputStream fileOutputStream = new FileOutputStream("Block " + genesisBlock.hash + ".ser");
+                                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                                objectOutputStream.writeObject(genesisBlock);
+                                objectOutputStream.close();
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+
+                        } else {
+                            Transaction transaction = new Transaction(1, variant.getId());
+                            Block lastBlock = VoteChain.chain.get(VoteChain.chain.size() - 1);
+                            Block block = new Block(lastBlock.preHash);
+                            block.AddTransaction(transaction);
+                            VoteChain.chain.add(block);
+                            VoteChain.IsValidChain();
+                            variant.setVariantScore(currScore + 1);
+                        }
+
+
+                        variantRepository.update(variant);
+
+                        e.onComplete();
+                    }
+                }).observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new Consumer() {
+                                       @Override
+                                       public void accept(Object o) throws Exception {
+                                           Toast.makeText(VoteVariantList.this, "Ok", Toast.LENGTH_SHORT).show();
+                                       }
+                                   }, new Consumer<Throwable>() {
+                                       @Override
+                                       public void accept(Throwable throwable) throws Exception {
+                                           Toast.makeText(VoteVariantList.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                       }
+                                   },
+                                new Action() {
+                                    @Override
+                                    public void run() throws Exception {
+                                        loadData();
+                                    }
+                                }
+                        );
+
                 break;
             }
         }
