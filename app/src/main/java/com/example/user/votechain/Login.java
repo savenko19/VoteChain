@@ -38,6 +38,7 @@ public class Login extends AppCompatActivity {
 
     private EditText edtUserName, edtPassword;
     private TextView txvLogin;
+    private TextView loginStatus;
 
     List<User> users = new ArrayList<>();
     //ArrayAdapter adapter;
@@ -56,7 +57,7 @@ public class Login extends AppCompatActivity {
 
         edtUserName = findViewById(R.id.edtLoginName);
         edtPassword = findViewById(R.id.edtLoginPassword);
-
+        loginStatus = findViewById(R.id.loginStatus);
         txvLogin = findViewById(R.id.txvLogin);
 
         //adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, users);
@@ -68,23 +69,39 @@ public class Login extends AppCompatActivity {
         txvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                users = (List<User>) userRepository.getAllUsers();
+                Disposable disposable = userRepository.getAllUsers()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new Consumer<List<User>>() {
+                            @Override
+                            public void accept(List<User> users) throws Exception {
+                                for (User user: users) {
+                                    if (user.getUserName().equals(edtUserName.getText().toString())) {
+                                        if (user.getPassword().equals(edtPassword.getText().toString())) {
+                                            Intent intent = new Intent(Login.this, UserProfile.class);
+                                            startActivity(intent);
+                                            break;
+                                        } else {
+                                            loginStatus.setText("Неверный пароль");
+                                        }
+                                    } else {
+                                        loginStatus.setText("Такого пользователя не существует");
+                                    }
+                                }
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) throws Exception {
+                                Toast.makeText(Login.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                compositeDisposable.add(disposable);
 
-                for (User user : users) {
-                    if (edtUserName.getText().toString().equals(user.getUserName())) {
-                        if (edtPassword.getText().toString().equals(user.getPassword())) {
-                            Intent intent = new Intent(Login.this, UserProfile.class);
-                            String userName = edtUserName.getText().toString();
-                            intent.putExtra("userName", userName);
-                            startActivity(intent);
-                            break;
-                        }
-                    }
-                }
                 if (edtUserName.getText().toString().equals("admin") && edtPassword.getText().toString().equals("admin")) {
                     Intent intent = new Intent(Login.this, CreateNewVote.class);
                     startActivity(intent);
                 }
+
 
                 if (edtUserName.getText().toString().equals("user") && edtPassword.getText().toString().equals("1234")) {
                     Intent intent = new Intent(Login.this, UserProfile.class);
